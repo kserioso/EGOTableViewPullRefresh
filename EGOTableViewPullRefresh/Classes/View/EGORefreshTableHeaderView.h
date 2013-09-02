@@ -47,14 +47,20 @@ typedef enum{
 
 }
 
-@property(nonatomic,assign) id <EGORefreshTableHeaderDelegate> delegate;
+@property (nonatomic, assign) id <EGORefreshTableHeaderDelegate> delegate;
+@property (nonatomic, strong) NSString *pullString;
+@property (nonatomic, strong) NSString *releaseString;
+@property (nonatomic, strong) NSString *loadingString;
+@property (nonatomic, strong) UIImageView *loadImageView;
 
-- (id)initWithFrame:(CGRect)frame arrowImageName:(NSString *)arrow textColor:(UIColor *)textColor;
+- (void)resumeRotation;
 
 - (void)refreshLastUpdatedDate;
 - (void)egoRefreshScrollViewDidScroll:(UIScrollView *)scrollView;
 - (void)egoRefreshScrollViewDidEndDragging:(UIScrollView *)scrollView;
 - (void)egoRefreshScrollViewDataSourceDidFinishedLoading:(UIScrollView *)scrollView;
+
+- (void)forceLoadScrollView:(UIScrollView *)scrollView;
 
 @end
 @protocol EGORefreshTableHeaderDelegate

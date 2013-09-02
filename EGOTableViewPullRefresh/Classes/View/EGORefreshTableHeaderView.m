@@ -25,9 +25,10 @@
 //
 
 #import "EGORefreshTableHeaderView.h"
+#import "UIColor+Benihime.h"
 
-
-#define TEXT_COLOR	 [UIColor colorWithRed:87.0/255.0 green:108.0/255.0 blue:137.0/255.0 alpha:1.0]
+#define TEXT_COLOR kViewBgColor
+//#define TEXT_COLOR	 [UIColor colorWithRed:87.0/255.0 green:108.0/255.0 blue:137.0/255.0 alpha:1.0]
 #define FLIP_ANIMATION_DURATION 0.18f
 
 
@@ -39,31 +40,36 @@
 
 @synthesize delegate=_delegate;
 
+@synthesize pullString =    _pullString;
+@synthesize releaseString = _releaseString;
+@synthesize loadingString = _loadingString;
+@synthesize loadImageView = _loadImageView;
 
-- (id)initWithFrame:(CGRect)frame arrowImageName:(NSString *)arrow textColor:(UIColor *)textColor  {
+- (id)initWithFrame:(CGRect)frame
+{
     if((self = [super initWithFrame:frame])) {
 		
 		self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-		self.backgroundColor = [UIColor colorWithRed:226.0/255.0 green:231.0/255.0 blue:237.0/255.0 alpha:1.0];
+        self.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"pull-to-refresh-bg-v2"]];
 
 		UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0.0f, frame.size.height - 30.0f, self.frame.size.width, 20.0f)];
 		label.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 		label.font = [UIFont systemFontOfSize:12.0f];
-		label.textColor = textColor;
-		label.shadowColor = [UIColor colorWithWhite:0.9f alpha:1.0f];
-		label.shadowOffset = CGSizeMake(0.0f, 1.0f);
+		label.textColor = kViewBgColor;
+		//label.shadowColor = [UIColor colorWithWhite:0.9f alpha:1.0f];
+		//label.shadowOffset = CGSizeMake(0.0f, 1.0f);
 		label.backgroundColor = [UIColor clearColor];
 		label.textAlignment = UITextAlignmentCenter;
 		[self addSubview:label];
 		_lastUpdatedLabel=label;
 		[label release];
 		
-		label = [[UILabel alloc] initWithFrame:CGRectMake(0.0f, frame.size.height - 48.0f, self.frame.size.width, 20.0f)];
+		label = [[UILabel alloc] initWithFrame:CGRectMake(0.0f, frame.size.height - 40.0f, self.frame.size.width, 20.0f)];
 		label.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-		label.font = [UIFont boldSystemFontOfSize:13.0f];
-		label.textColor = textColor;
-		label.shadowColor = [UIColor colorWithWhite:0.9f alpha:1.0f];
-		label.shadowOffset = CGSizeMake(0.0f, 1.0f);
+		label.font = FONT_HELVETICA_NEUE_BOLD(@"14.0f");
+		label.textColor = kViewBgColor;
+		//label.shadowColor = [UIColor colorWithWhite:0.9f alpha:1.0f];
+		//label.shadowOffset = CGSizeMake(0.0f, 1.0f);
 		label.backgroundColor = [UIColor clearColor];
 		label.textAlignment = UITextAlignmentCenter;
 		[self addSubview:label];
@@ -71,9 +77,9 @@
 		[label release];
 		
 		CALayer *layer = [CALayer layer];
-		layer.frame = CGRectMake(25.0f, frame.size.height - 65.0f, 30.0f, 55.0f);
+		layer.frame = CGRectMake(25.0f, frame.size.height - 45.0f, 30.0f, 35.0f);
 		layer.contentsGravity = kCAGravityResizeAspect;
-		layer.contents = (id)[UIImage imageNamed:arrow].CGImage;
+		layer.contents = (id)[UIImage imageNamed:@"pull-to-refresh-down-arrow.png"].CGImage;
 		
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 40000
 		if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)]) {
@@ -86,10 +92,18 @@
 		
 		UIActivityIndicatorView *view = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
 		view.frame = CGRectMake(25.0f, frame.size.height - 38.0f, 20.0f, 20.0f);
+        view.hidden = YES;
 		[self addSubview:view];
 		_activityView = view;
 		[view release];
-		
+        
+        _pullString = @"Pull down to refresh";
+        _releaseString = @"Release to refresh";
+        _loadingString = STR_LOADING;
+        
+        _loadImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, frame.size.height - 50.0f, 30, 37)];
+        _loadImageView.image = [UIImage imageNamed:@"loader-sprite.png"];
+        [self addSubview:_loadImageView];
 		
 		[self setState:EGOOPullRefreshNormal];
 		
@@ -97,10 +111,6 @@
 	
     return self;
 	
-}
-
-- (id)initWithFrame:(CGRect)frame  {
-  return [self initWithFrame:frame arrowImageName:@"blueArrow.png" textColor:TEXT_COLOR];
 }
 
 #pragma mark -
@@ -131,12 +141,33 @@
 
 - (void)setState:(EGOPullRefreshState)aState{
 	
+    CGSize size;
+    CGFloat subViewsWidth;
+    CGRect newFrame;
+    
 	switch (aState) {
 		case EGOOPullRefreshPulling:
 			
-			_statusLabel.text = NSLocalizedString(@"Release to refresh...", @"Release to refresh status");
+			_statusLabel.text = NSLocalizedString(_releaseString, @"Release to refresh status");
+            
+            //reposition
+            size = [_statusLabel.text sizeWithFont:_statusLabel.font forWidth:(self.bounds.size.width-50) lineBreakMode:(SYSTEM_VERSION_GREATER_THAN(@"6.0")? UILineBreakModeTailTruncation:NSLineBreakByTruncatingTail)];
+            subViewsWidth = size.width+_arrowImage.bounds.size.width+10;
+            
+            newFrame = _statusLabel.frame;
+            newFrame.size = size;
+            newFrame.origin.x = self.bounds.size.width/2 - subViewsWidth/2 + _arrowImage.bounds.size.width+10 - 15;
+            _statusLabel.frame = newFrame;
+            
+            newFrame = _arrowImage.frame;
+            newFrame.origin.x = self.bounds.size.width/2 - subViewsWidth/2 - 15;
+            _arrowImage.frame = newFrame;
+            
+            //animation
 			[CATransaction begin];
 			[CATransaction setAnimationDuration:FLIP_ANIMATION_DURATION];
+            _loadImageView.hidden = YES;
+            _arrowImage.hidden = NO;
 			_arrowImage.transform = CATransform3DMakeRotation((M_PI / 180.0) * 180.0f, 0.0f, 0.0f, 1.0f);
 			[CATransaction commit];
 			
@@ -149,11 +180,29 @@
 				_arrowImage.transform = CATransform3DIdentity;
 				[CATransaction commit];
 			}
+            
+            [_loadImageView.layer removeAllAnimations];
 			
-			_statusLabel.text = NSLocalizedString(@"Pull down to refresh...", @"Pull down to refresh status");
-			[_activityView stopAnimating];
+			_statusLabel.text = NSLocalizedString(_pullString, @"Pull down to refresh status");
+            
+            //reposition
+            size = [_statusLabel.text sizeWithFont:_statusLabel.font forWidth:(self.bounds.size.width-50) lineBreakMode:(SYSTEM_VERSION_GREATER_THAN(@"6.0")? UILineBreakModeTailTruncation:NSLineBreakByTruncatingTail)];
+            subViewsWidth = size.width+_arrowImage.bounds.size.width+10;
+            
+            newFrame = _statusLabel.frame;
+            newFrame.size = size;
+            newFrame.origin.x = self.bounds.size.width/2 - subViewsWidth/2 + _arrowImage.bounds.size.width+10 - 15;
+            _statusLabel.frame = newFrame;
+            
+            newFrame = _arrowImage.frame;
+            newFrame.origin.x = self.bounds.size.width/2 - subViewsWidth/2 - 15;
+            _arrowImage.frame = newFrame;
+            
+            //animation
+			//[_activityView stopAnimating];
 			[CATransaction begin];
-			[CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions]; 
+			[CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
+            _loadImageView.hidden = YES;
 			_arrowImage.hidden = NO;
 			_arrowImage.transform = CATransform3DIdentity;
 			[CATransaction commit];
@@ -163,11 +212,36 @@
 			break;
 		case EGOOPullRefreshLoading:
 			
-			_statusLabel.text = NSLocalizedString(@"Loading...", @"Loading Status");
-			[_activityView startAnimating];
+			_statusLabel.text = NSLocalizedString(_loadingString, @"Loading Status");
+            
+            // reposition
+            size = [_statusLabel.text sizeWithFont:_statusLabel.font forWidth:(self.bounds.size.width-50) lineBreakMode:(SYSTEM_VERSION_GREATER_THAN(@"6.0")? UILineBreakModeTailTruncation:NSLineBreakByTruncatingTail)];
+            subViewsWidth = size.width+_loadImageView.bounds.size.width+10;
+            
+            newFrame = _statusLabel.frame;
+            newFrame.size = size;
+            newFrame.origin.x = self.bounds.size.width/2 - subViewsWidth/2 + _arrowImage.bounds.size.width+10 - 15;
+            _statusLabel.frame = newFrame;
+            
+            newFrame = _loadImageView.frame;
+            newFrame.origin.x = self.bounds.size.width/2 - subViewsWidth/2 - 15;
+            _loadImageView.frame = newFrame;
+            
+            //animation
+			//[_activityView startAnimating];
 			[CATransaction begin];
-			[CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions]; 
-			_arrowImage.hidden = YES;
+			[CATransaction setValue:(id)kCFBooleanFalse forKey:kCATransactionDisableActions];
+            _arrowImage.hidden = YES;
+            _loadImageView.hidden = NO;
+            
+            CABasicAnimation *fullRotation;
+            fullRotation = [CABasicAnimation animationWithKeyPath:@"transform.rotation"];
+            fullRotation.fromValue = [NSNumber numberWithFloat:0];
+            fullRotation.toValue = [NSNumber numberWithFloat:((360*M_PI)/180)];
+            fullRotation.duration = 0.4;
+            fullRotation.repeatCount = INTMAX_MAX;
+            [_loadImageView.layer addAnimation:fullRotation forKey:@"360"];
+            
 			[CATransaction commit];
 			
 			break;
@@ -178,11 +252,29 @@
 	_state = aState;
 }
 
+#pragma mark -
+#pragma mark - Rotation methods
+
+- (void)resumeRotation
+{
+    [CATransaction begin];
+    [CATransaction setValue:(id)kCFBooleanFalse forKey:kCATransactionDisableActions];
+
+    CABasicAnimation *fullRotation;
+    fullRotation = [CABasicAnimation animationWithKeyPath:@"transform.rotation"];
+    fullRotation.fromValue = [NSNumber numberWithFloat:0];
+    fullRotation.toValue = [NSNumber numberWithFloat:((360*M_PI)/180)];
+    fullRotation.duration = 0.4;
+    fullRotation.repeatCount = INTMAX_MAX;
+    [_loadImageView.layer addAnimation:fullRotation forKey:@"360"];
+    
+    [CATransaction commit];
+}
 
 #pragma mark -
 #pragma mark ScrollView Methods
 
-- (void)egoRefreshScrollViewDidScroll:(UIScrollView *)scrollView {	
+- (void)egoRefreshScrollViewDidScroll:(UIScrollView *)scrollView {
 	
 	if (_state == EGOOPullRefreshLoading) {
 		
@@ -220,31 +312,45 @@
 	
 	if (scrollView.contentOffset.y <= - 65.0f && !_loading) {
 		
-		if ([_delegate respondsToSelector:@selector(egoRefreshTableHeaderDidTriggerRefresh:)]) {
-			[_delegate egoRefreshTableHeaderDidTriggerRefresh:self];
-		}
-		
 		[self setState:EGOOPullRefreshLoading];
 		[UIView beginAnimations:nil context:NULL];
 		[UIView setAnimationDuration:0.2];
 		scrollView.contentInset = UIEdgeInsetsMake(60.0f, 0.0f, 0.0f, 0.0f);
 		[UIView commitAnimations];
+        
+        [Utilities appDelegate].shouldRefreshScreen = YES;
 		
+        if ([_delegate respondsToSelector:@selector(egoRefreshTableHeaderDidTriggerRefresh:)]) {
+			[_delegate egoRefreshTableHeaderDidTriggerRefresh:self];
+		}
 	}
-	
 }
 
-- (void)egoRefreshScrollViewDataSourceDidFinishedLoading:(UIScrollView *)scrollView {	
-	
-	[UIView beginAnimations:nil context:NULL];
-	[UIView setAnimationDuration:.3];
-	[scrollView setContentInset:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
-	[UIView commitAnimations];
-	
-	[self setState:EGOOPullRefreshNormal];
-
+- (void)egoRefreshScrollViewDataSourceDidFinishedLoading:(UIScrollView *)scrollView
+{    
+    [UIView beginAnimations:nil context:NULL];
+    [UIView setAnimationDuration:.3];
+    [scrollView setContentInset:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
+//    [scrollView setContentOffset:CGPointMake(scrollView.contentOffset.x, 0) animated:YES];
+    [UIView commitAnimations];
+    
+    [Utilities appDelegate].shouldRefreshScreen = NO;
+    [self setState:EGOOPullRefreshNormal];
 }
 
+- (void)forceLoadScrollView:(UIScrollView *)scrollView
+{
+    scrollView.contentInset = UIEdgeInsetsMake(60.0f, 0.0f, 0.0f, 0.0f);
+    [scrollView setContentOffset:CGPointMake(0, -65.0f) animated:NO];
+    [scrollView scrollRectToVisible:CGRectMake(0, -65, 2, 2) animated:YES];
+    
+    [Utilities appDelegate].shouldRefreshScreen = YES;
+    
+    [self egoRefreshScrollViewDidEndDragging:scrollView];
+    if ([scrollView.delegate respondsToSelector:@selector(scrollViewDidEndDecelerating:)]) {
+        [scrollView.delegate scrollViewDidEndDecelerating:scrollView];
+    }
+}
 
 #pragma mark -
 #pragma mark Dealloc
