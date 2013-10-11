@@ -151,7 +151,7 @@
 			_statusLabel.text = NSLocalizedString(_releaseString, @"Release to refresh status");
             
             //reposition
-            size = [_statusLabel.text sizeWithFont:_statusLabel.font forWidth:(self.bounds.size.width-50) lineBreakMode:(SYSTEM_VERSION_GREATER_THAN(@"6.0")? UILineBreakModeTailTruncation:NSLineBreakByTruncatingTail)];
+            size = [_statusLabel.text sizeWithFont:_statusLabel.font forWidth:(self.bounds.size.width-50) lineBreakMode:NSLineBreakByTruncatingTail];
             subViewsWidth = size.width+_arrowImage.bounds.size.width+10;
             
             newFrame = _statusLabel.frame;
@@ -186,7 +186,7 @@
 			_statusLabel.text = NSLocalizedString(_pullString, @"Pull down to refresh status");
             
             //reposition
-            size = [_statusLabel.text sizeWithFont:_statusLabel.font forWidth:(self.bounds.size.width-50) lineBreakMode:(SYSTEM_VERSION_GREATER_THAN(@"6.0")? UILineBreakModeTailTruncation:NSLineBreakByTruncatingTail)];
+            size = [_statusLabel.text sizeWithFont:_statusLabel.font forWidth:(self.bounds.size.width-50) lineBreakMode:NSLineBreakByTruncatingTail];
             subViewsWidth = size.width+_arrowImage.bounds.size.width+10;
             
             newFrame = _statusLabel.frame;
@@ -215,7 +215,7 @@
 			_statusLabel.text = NSLocalizedString(_loadingString, @"Loading Status");
             
             // reposition
-            size = [_statusLabel.text sizeWithFont:_statusLabel.font forWidth:(self.bounds.size.width-50) lineBreakMode:(SYSTEM_VERSION_GREATER_THAN(@"6.0")? UILineBreakModeTailTruncation:NSLineBreakByTruncatingTail)];
+            size = [_statusLabel.text sizeWithFont:_statusLabel.font forWidth:(self.bounds.size.width-50) lineBreakMode:NSLineBreakByTruncatingTail];
             subViewsWidth = size.width+_loadImageView.bounds.size.width+10;
             
             newFrame = _statusLabel.frame;
