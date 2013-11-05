@@ -318,7 +318,7 @@
 		scrollView.contentInset = UIEdgeInsetsMake(60.0f, 0.0f, 0.0f, 0.0f);
 		[UIView commitAnimations];
         
-        [Utilities appDelegate].shouldRefreshScreen = YES;
+        [PHUtilities appDelegate].shouldRefreshScreen = YES;
 		
         if ([_delegate respondsToSelector:@selector(egoRefreshTableHeaderDidTriggerRefresh:)]) {
 			[_delegate egoRefreshTableHeaderDidTriggerRefresh:self];
@@ -334,7 +334,7 @@
 //    [scrollView setContentOffset:CGPointMake(scrollView.contentOffset.x, 0) animated:YES];
     [UIView commitAnimations];
     
-    [Utilities appDelegate].shouldRefreshScreen = NO;
+    [PHUtilities appDelegate].shouldRefreshScreen = NO;
     [self setState:EGOOPullRefreshNormal];
 }
 
@@ -344,7 +344,7 @@
     [scrollView setContentOffset:CGPointMake(0, -65.0f) animated:NO];
     [scrollView scrollRectToVisible:CGRectMake(0, -65, 2, 2) animated:YES];
     
-    [Utilities appDelegate].shouldRefreshScreen = YES;
+    [PHUtilities appDelegate].shouldRefreshScreen = YES;
     
     [self egoRefreshScrollViewDidEndDragging:scrollView];
     if ([scrollView.delegate respondsToSelector:@selector(scrollViewDidEndDecelerating:)]) {
