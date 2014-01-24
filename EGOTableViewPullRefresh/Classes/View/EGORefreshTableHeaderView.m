@@ -27,7 +27,7 @@
 #import "EGORefreshTableHeaderView.h"
 #import "UIColor+Benihime.h"
 
-#define TEXT_COLOR kViewBgColor
+#define TEXT_COLOR COLOR_VIEW_BG
 //#define TEXT_COLOR	 [UIColor colorWithRed:87.0/255.0 green:108.0/255.0 blue:137.0/255.0 alpha:1.0]
 #define FLIP_ANIMATION_DURATION 0.18f
 
@@ -55,7 +55,7 @@
 		UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0.0f, frame.size.height - 30.0f, self.frame.size.width, 20.0f)];
 		label.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 		label.font = [UIFont systemFontOfSize:12.0f];
-		label.textColor = kViewBgColor;
+		label.textColor = COLOR_VIEW_BG;
 		//label.shadowColor = [UIColor colorWithWhite:0.9f alpha:1.0f];
 		//label.shadowOffset = CGSizeMake(0.0f, 1.0f);
 		label.backgroundColor = [UIColor clearColor];
@@ -67,7 +67,7 @@
 		label = [[UILabel alloc] initWithFrame:CGRectMake(0.0f, frame.size.height - 40.0f, self.frame.size.width, 20.0f)];
 		label.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 		label.font = FONT_HELVETICA_NEUE_BOLD(@"14.0f");
-		label.textColor = kViewBgColor;
+		label.textColor = COLOR_VIEW_BG;
 		//label.shadowColor = [UIColor colorWithWhite:0.9f alpha:1.0f];
 		//label.shadowOffset = CGSizeMake(0.0f, 1.0f);
 		label.backgroundColor = [UIColor clearColor];
